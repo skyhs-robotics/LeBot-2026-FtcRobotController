@@ -1,9 +1,18 @@
+// quickstart
+// https://docs.limelightvision.io/docs/docs-limelight/getting-started/limelight-3a
+// docs
+// https://docs.limelightvision.io/docs/docs-limelight/apis/ftc-programming
+
+// left off on docs-5. Where is my robot?
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @TeleOp(name = "", group = "")
 public class LimelightTest extends LinearOpMode {
@@ -12,32 +21,35 @@ public class LimelightTest extends LinearOpMode {
     @Override
     public void runOpMode()
     {
-        // init
+        // init //
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        telemetry.setMsTransmissionInterval(11); // what does this do?
+        limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
+        limelight.start(); // This tells Limelight to start looking!
 
-        limelight.pipelineSwitch(0); // what does this do?
+        limelight.pipelineSwitch(0); // Switch to pipeline number 0
 
-        /*
-         * Starts polling for data.
-         * what??? does it start scanning? turn on the camera? do both?
-         */
-        limelight.start();
-
+        // loop //
         while (opModeIsActive())
         {
-            next:
-                sleep(10); // nvm i cant figure out goto lol
+            sleep(10); // allow for other things to run
 
             LLResult result = limelight.getLatestResult();
-            if (result == null) {
-                continue next;
+            if (result != null && result.isValid()) {
+                double tx = result.getTx(); // How far left or right the target is (degrees)
+                double ty = result.getTy(); // How far up or down the target is (degrees)
+                double ta = result.getTa(); // How big the target looks (0%-100% of the image)
+
+                telemetry.addData("Target X", tx);
+                telemetry.addData("Target Y", ty);
+                telemetry.addData("Target Area", ta);
+            } else {
+                telemetry.addData("Limelight", "No Targets");
             }
         }
 
-        // if this below runs it means the opmode has been canceled so de-init
-        limelight.stop(); // well opposite of start i guess (what does this do?)
+        // de-init //
+        limelight.stop();
 
     } // end method runOpmode()
 }
