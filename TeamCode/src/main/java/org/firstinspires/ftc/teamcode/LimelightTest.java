@@ -14,9 +14,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
-@TeleOp(name = "", group = "")
+@TeleOp(name = "ll", group = "")
 public class LimelightTest extends LinearOpMode {
     private Limelight3A limelight;
+
+    private void rotate(int degrees)
+    {
+
+    }
 
     @Override
     public void runOpMode()
@@ -35,6 +40,7 @@ public class LimelightTest extends LinearOpMode {
             sleep(10); // allow for other things to run
 
             LLResult result = limelight.getLatestResult();
+
             if (result != null && result.isValid()) {
                 double tx = result.getTx(); // How far left or right the target is (degrees)
                 double ty = result.getTy(); // How far up or down the target is (degrees)
