@@ -43,9 +43,10 @@ public class TestFtcDecodeAutonomous extends LinearOpMode {
     double rsx = 0; // orientation
 
     double kickPosition = KICK_REST_POSITION;
+    double outtakePower = 0;
 
-    double shotDuration = 0;
-    double shotTime = 0;
+    long shotDuration = 0;
+    long shotTime = 0;
     double shotPower = 0;
 
     @Override
@@ -84,19 +85,26 @@ public class TestFtcDecodeAutonomous extends LinearOpMode {
 
             rsx = 0; // orientation
 
+            outtakePower = 0;
             kickPosition = KICK_REST_POSITION;
+
+            if (shotTime + shotDuration >= System.currentTimeMillis()) {
+                // shooting
+                kickPosition = KICK_POSITION;
+                outtakePower = shotPower;
+            }
 
             LLResult llResult = limelight.getLatestResult();
             if (!ComputedLLResult.goodLLResult(llResult)) {
                 ComputedLLResult computedLLResult = new ComputedLLResult(llResult);
 
                 switch (currentPipeline) {
-                    case BALLS_SCANNING: ballsScanningFrame(computedLLResult);
+                    case BALLS_SCANNING:    ballsScanningFrame(computedLLResult);
                     case APRILTAG_SHOOTING: aprilTagShootingFrame(computedLLResult);
                 }
             } else {
                 switch (currentPipeline) {
-                    case BALLS_SCANNING: ballsScanningFrame();
+                    case BALLS_SCANNING:    ballsScanningFrame();
                     case APRILTAG_SHOOTING: aprilTagShootingFrame();
                 }
             }
@@ -107,6 +115,7 @@ public class TestFtcDecodeAutonomous extends LinearOpMode {
             rightBackDrive.setPower(lsy - lsx + rsx);
 
             kickServo.setPosition(kickPosition);
+            outtakeMotor.setPower(outtakePower);
         }
 
         // de-init
@@ -121,35 +130,44 @@ public class TestFtcDecodeAutonomous extends LinearOpMode {
     private void ballsScanningFrame(ComputedLLResult computedLLResult)
     {
         // found a ball, move towards it
+        double targetX = computedLLResult.targetX;
+        double distanceAlpha = computedLLResult.targetDistanceAlpha;
+
+        rsx = 1 * Math.signum(targetX);
+
+        if (targetX >= -2 & targetX <= 2)
+        {
+
+        }
     }
     private void aprilTagShootingFrame()
     {
         // look for april tag
+
     }
     private void aprilTagShootingFrame(ComputedLLResult computedLLResult)
     {
         // found april tag, rotate towards it, or if centered then shoot at it
         double targetX = computedLLResult.targetX;
-        double distanceAlpha = computedLLResult.targetDistanceAlpha; // 1: really close, 0.1: far
+        double distanceAlpha = computedLLResult.targetDistanceAlpha; // 4: really close, 0.1: far
 
         rsx = 1 * Math.signum(targetX);
 
         if (targetX >= -4 & targetX <= 4)
         {
            // centered, shoot at it for 2 seconds
-            shootBall(1-(distanceAlpha-0.05), 2);
-
+            shootBall(distanceAlpha, 2000);
         }
     }
 
     // helper functions
 
-    // lift the kicker and turn on the outtake for variable seconds
-    private void shootBall(double outtakePower, double milliseconds)
+    // lift the kicker and turn on the outtake for variable milliseconds
+    private void shootBall(double outtakePower, long milliseconds)
     {
-        shotTime = System.currentTimeMillis()
-        kickPosition = KICK_POSITION;
-        outtakeMotor.setPower(outtakePower);
+        shotTime = System.currentTimeMillis();
+        shotDuration = milliseconds;
+        shotPower = outtakePower;
     }
 
     private void changePipeline(Pipeline pipeline)

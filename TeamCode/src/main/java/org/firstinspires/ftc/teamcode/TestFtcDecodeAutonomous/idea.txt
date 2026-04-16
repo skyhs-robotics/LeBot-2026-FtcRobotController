@@ -1,0 +1,5 @@
+data idea:
+figre out 3d position & y rotation of robot relative towards arena
+once u figure that out the positioning will be very easy
+as the robot moves around every apriltag or ball detected is stored with their relative position
+
