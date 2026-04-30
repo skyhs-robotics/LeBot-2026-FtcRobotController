@@ -1,0 +1,11 @@
+3 files:
+
+The original command auto
+    (Edit it to yes the abstracted controller)
+Abstracted controller
+    (you call its functions to make a motor turn on & power)
+    (should be no more need for creating class
+Limelight functions
+    (auto rotate towards LimelightResult function)
+    (pick up function from Limelight Result target distance)
+
