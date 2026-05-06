@@ -15,18 +15,24 @@ public class NewFtcDecodeV2Autonomous extends LinearOpMode {
     {
         // init
         control.initComponents();
+        limelightAutonomous.init();
 
-        // asynchronously run commandAutonomous because it yields
+        // i need a thread because this yields
         new Thread(commandAutonomous::run).start();
+        new Thread(() -> {
+            commandAutonomous.run();
+            // when it's finished do limelight loop
+            while (opModeIsActive()) limelightAutonomous.shootBall();
+        }).start();
 
         // loop
         while (opModeIsActive())
         {
-            control.resetFrame(); // reset
+//            control.resetFrame(); // reset
 
             limelightAutonomous.frame();
 
-            control.frame(); // in-act motors
+            control.frame(); // turn on components
 
             telemetry.update();
             sleep(10);

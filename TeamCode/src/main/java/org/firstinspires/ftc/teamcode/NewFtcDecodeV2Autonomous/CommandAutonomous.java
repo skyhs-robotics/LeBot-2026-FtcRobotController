@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class CommandAutonomous {
     // this function is so we can use the opmode functions like telemetry
-    private LinearOpMode op = null;
+    final private LinearOpMode op;
     public CommandAutonomous(LinearOpMode providedOp)
     {
         op = providedOp;
@@ -13,7 +13,7 @@ public class CommandAutonomous {
     }
 
     final private Control control = Control.getInstance();
-    private LimelightAutonomous limelightAutonomous = null;
+    final private LimelightAutonomous limelightAutonomous;
 
     private static final double INTAKE_SPEED = 0.8;
     /** Flywheel (outtake) runs at this power for the whole autonomous; set once at start. */
@@ -120,13 +120,13 @@ public class CommandAutonomous {
                 break;
             }
             case CENTER: {
-                limelightAutonomous.lookAtCode(true);
+                limelightAutonomous.lookAtTag(true);
 
                 while (op.opModeIsActive() && timer.seconds() < cmd.timeSec) {
                     op.telemetry.update();
                 }
 
-                limelightAutonomous.lookAtCode(false);
+                limelightAutonomous.lookAtTag(false);
             }
             case NOP:
                 while (op.opModeIsActive() && timer.seconds() < cmd.timeSec) {
