@@ -4,14 +4,20 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+// turn right = rsx = 1
+// turn left = rsx = -1
+
 public class LimelightAutonomous {
     // this function is so we can use the opmode functions like telemetry
     final private LinearOpMode op;
-    public LimelightAutonomous(LinearOpMode providedOp) {op = providedOp;}
+    public LimelightAutonomous(LinearOpMode providedOp) {
+        op = providedOp;
+        control = Control.getInstance(op);
+    }
 
     private static LimelightAutonomous single_instance = null;
 
-    final private static Control control = Control.getInstance();
+    final private Control control;
 
     // enums
     public enum Mode {APRIL_TAG_CENTER, BALL_RETRIEVE, NONE}
@@ -44,7 +50,6 @@ public class LimelightAutonomous {
         }
 
         // look at tag
-        control.drive(0, 0, -TURN_POWER); // turn towards known AprilTag location
         currentMode = Mode.APRIL_TAG_CENTER;
         control.limelight.pipelineSwitch(1);
     }
@@ -57,9 +62,12 @@ public class LimelightAutonomous {
         control.limelight.pipelineSwitch(0);
 
         centeredBall = false;
-        control.drive(0, 0, TURN_POWER); // turn towards known ball locations
+//        control.drive(0, 0, TURN_POWER); // turn towards known ball locations (right)
 
         while (!centeredBall) op.sleep(1);
+
+        // ball has been centered
+        currentMode = Mode.NONE;
 
         long movementMs = (long)(1000*(lastBallTa /100));
 
@@ -106,16 +114,25 @@ public class LimelightAutonomous {
             case APRIL_TAG_CENTER: {
                 LLResult result = control.limelight.getLatestResult();
 
-                if (result == null || !result.isValid() || result.getPipelineIndex() != 0) return;
+                if (result == null || result.getPipelineIndex() != 1) return;
+
+                if (!result.isValid())
+                {
+                    control.drive(0, 0, -TURN_POWER); // turn towards known AprilTag location (left)
+                    return;
+                }
 
                 double xOffset = result.getTx();
 
                 if (Math.abs(xOffset) <= APRIL_TAG_CENTER_THRESHOLD) {
                     control.drive(0, 0, 0);
                     aprilTagCentered = true;
+                    op.telemetry.addData("Limelight auto", "APRILTAG CENTERED!");
                     return;
                 }
 
+                op.telemetry.addData("Limelight auto turn","Turning towards april tag");
+                // turn towards april tag
                 control.drive(0, 0, TURN_POWER * Math.signum(xOffset));
             }
             case BALL_RETRIEVE: {
@@ -123,7 +140,14 @@ public class LimelightAutonomous {
 
                 LLResult result = control.limelight.getLatestResult();
 
-                if (result == null || !result.isValid() || result.getPipelineIndex() != 1) return;
+                if (result == null || result.getPipelineIndex() != 0) return;
+
+                if (!result.isValid())
+                {
+                    op.telemetry.addData("Limelight invalid", "Invalid");
+                    control.drive(0, 0, TURN_POWER); // turn towards known ball locations (right)
+                    return;
+                }
 
                 double xOffset = result.getTx();
                 lastBallTa = result.getTa();
@@ -132,9 +156,12 @@ public class LimelightAutonomous {
                 {
                     centeredBall = true;
                     control.drive(0, 0, 0);
+                    op.telemetry.addData("Limelight auto", "BALL CENTERED!");
                     return;
                 }
 
+                op.telemetry.addData("Limelight auto turn","Turning towards ball");
+                // turn towards ball
                 control.drive(0, 0, TURN_POWER * Math.signum(xOffset));
             }
         }

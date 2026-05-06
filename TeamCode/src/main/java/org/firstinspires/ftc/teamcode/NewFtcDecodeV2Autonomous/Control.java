@@ -11,10 +11,14 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.har
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Control {
+    final private LinearOpMode op;
+    public Control(LinearOpMode providedOp) {op = providedOp;}
+
     private static Control single_instance = null;
 
     // constants
@@ -148,19 +152,19 @@ public class Control {
     /// Initializes components to their variables & base configurations
     public void initComponents()
     {
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontLeft");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontRight");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "backLeft");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "backRight");
+        leftFrontDrive = op.hardwareMap.get(DcMotor.class, "frontLeft");
+        rightFrontDrive = op.hardwareMap.get(DcMotor.class, "frontRight");
+        leftBackDrive = op.hardwareMap.get(DcMotor.class, "backLeft");
+        rightBackDrive = op.hardwareMap.get(DcMotor.class, "backRight");
 
-        intakeMotor = hardwareMap.get(DcMotor.class, "intake");
-        outtakeMotor = hardwareMap.get(DcMotor.class, "shooter");
-        kickServo = hardwareMap.get(Servo.class, "kick");
+        intakeMotor = op.hardwareMap.get(DcMotor.class, "intake");
+        outtakeMotor = op.hardwareMap.get(DcMotor.class, "shooter");
+        kickServo = op.hardwareMap.get(Servo.class, "kick");
 
-        parkLeft = hardwareMap.get(DcMotor.class, "leftPark");
-        parkRight = hardwareMap.get(DcMotor.class, "rightPark");
+        parkLeft = op.hardwareMap.get(DcMotor.class, "leftPark");
+        parkRight = op.hardwareMap.get(DcMotor.class, "rightPark");
 
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight = op.hardwareMap.get(Limelight3A.class, "limelight");
 
         // configurations
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -176,7 +180,7 @@ public class Control {
 //        parkLeft.setPower(0.8);
 //        parkRight.setPower(0.8);
 
-        telemetry.addData("Control Status", "initialized");
+        op.telemetry.addData("Control Status", "initialized");
     }
 
     /// Deinitializes components (turning them off)
@@ -190,10 +194,10 @@ public class Control {
     }
 
     /// Returns the Control singleton
-    public static synchronized Control getInstance()
+    public static synchronized Control getInstance(LinearOpMode providedOp)
     {
         if (single_instance == null)
-            single_instance = new Control();
+            single_instance = new Control(providedOp);
 
         return single_instance;
     }

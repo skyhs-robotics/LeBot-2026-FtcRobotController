@@ -10,9 +10,10 @@ public class CommandAutonomous {
     {
         op = providedOp;
         limelightAutonomous = LimelightAutonomous.getInstance(op);
+        control = Control.getInstance(op);
     }
 
-    final private Control control = Control.getInstance();
+    final private Control control;
     final private LimelightAutonomous limelightAutonomous;
 
     private static final double INTAKE_SPEED = 0.8;
